@@ -1,0 +1,4 @@
+type=dhcp-client
+ip-address=
+default-gateway=
+netmask=

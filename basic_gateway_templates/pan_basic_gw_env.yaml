@@ -1,0 +1,9 @@
+parameters:
+  mgmt_network: mgmt_ext_net
+  public_network: public_net
+  pan_image: pa-vm-7.1.4
+  pan_flavor: m1.medium
+  server_image: Ubuntu-14.04
+  server_flavor: m1.small
+  server_key: server_key
+
