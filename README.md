@@ -13,6 +13,6 @@ This project is released under the official support policy of Palo Alto Networks
 Only projects explicitly tagged with "Supported" information are officially supported. Unless explicitly tagged, all projects or work posted in our [GitHub repository](https://github.com/PaloAltoNetworks) or sites other than our official [Downloads page](https://support.paloaltonetworks.com/) are provided under the best effort policy.
 
 **Documentation**
-* Release Notes: Included in this repository.
-*Technical Documentation: [7.1 VM-Series Deployment Guide](https://www.paloaltonetworks.com/documentation/71/virtualization/virtualization/set-up-the-vm-series-firewall-on-openstack)
+* Release Notes: Included in this repository.  
+*Technical Documentation: [7.1 VM-Series Deployment Guide](https://www.paloaltonetworks.com/documentation/71/virtualization/virtualization/set-up-the-vm-series-firewall-on-openstack)  
 *Technical Documentation: [8.0 VM-Series Deployment Guide](https://www.paloaltonetworks.com/documentation/80/virtualization/virtualization/set-up-the-vm-series-firewall-on-openstack)
