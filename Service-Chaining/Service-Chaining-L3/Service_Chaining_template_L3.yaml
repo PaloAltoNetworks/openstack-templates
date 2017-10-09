@@ -16,9 +16,6 @@ parameters:
   right_vn_fqdn:
     type: string
     description: FQ Name of the right network
-  flavor:
-    type: string
-    description: Flavor  
   domain:
     type: string
     description: Name of the Domain

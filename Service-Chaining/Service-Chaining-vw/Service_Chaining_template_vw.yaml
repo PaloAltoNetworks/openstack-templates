@@ -16,12 +16,6 @@ parameters:
   right_vn_fqdn:
     type: string
     description: FQ Name of the right network
-  image:
-    type: string
-    description: Name of the image
-  flavor:
-    type: string
-    description: Flavor  
   domain:
     type: string
     description: Name of the Domain
@@ -88,9 +82,12 @@ parameters:
   flavor: 
     type: string
     description: Flavor of the end VMs
-  image: 
+  left_vm_image:
     type: string
-    description: Name of the end VM image
+    description: Name of the left VM image
+  right_vm_image:
+    type: string
+    description: Name of the right VM image
   left_vm_name:
     type: string
     description: Name of the left VM
@@ -250,7 +247,6 @@ resources:
               }
             ],
           service_template_properties_flavor: { get_param: S_Tmp_flavor },
-          #service_template_properties_service_virtualization_type: { get_param: service_template_properties_service_virtualization_type },
           service_template_properties_service_virtualization_type: virtual-machine,
           }
       domain: { get_param: domain }
@@ -401,7 +397,7 @@ resources:
     depends_on: [ left_VM_InstanceIp ]
     properties:
       name: {get_param: left_vm_name }
-      image: { get_param:  image }
+      image: { get_param:  left_vm_image }
       flavor: { get_param: flavor }
       networks:
         - port: { get_resource: left_VM_VirtualMachineInterface }
@@ -411,7 +407,7 @@ resources:
     depends_on: [ right_VM_InstanceIp ]
     properties:
       name: {get_param: right_vm_name }
-      image: { get_param:  image }
+      image: { get_param:  right_vm_image }
       flavor: { get_param: flavor }
       networks:
         - port: { get_resource: right_VM_VirtualMachineInterface }

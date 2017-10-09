@@ -306,7 +306,6 @@
               <accept-dhcp-domain>no</accept-dhcp-domain>
             </dhcp-client>
           </type>
-          <server-verification>yes</server-verification>
         </system>
         <setting>
           <config>

@@ -8,7 +8,8 @@ parameters:
   route_target: "target:64512:20000"
 # VM config  
   flavor: 'm1.small'
-  image: 'TestVM'
+  right_vm_image: 'TestVM'
+  left_vm_image: 'TestVM'
   svm_name: 'PAN_SVM_vw'
   left_vm_name: 'Left_VM_vw'
   right_vm_name: 'Right_VM_vw'
