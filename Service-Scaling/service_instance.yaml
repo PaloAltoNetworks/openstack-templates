@@ -1,0 +1,135 @@
+heat_template_version: 2015-04-30
+
+description: >
+  HOT template for service-Pan_Svm_instance scaling
+parameters:
+  virtual_network_M:
+    type: string
+    description: mgmt_virtual_network for the ServiceInstance
+  virtual_network_M_fqdn:
+    type: string
+    description: mgmt_virtual_network for the ServiceInstance
+  virtual_network_L:
+    type: string
+    description: left_virtual_network for the ServiceInstance
+  virtual_network_L_fqdn:
+    type: string
+    description: mgmt_virtual_network for the ServiceInstance
+  virtual_network_R:
+    type: string
+    description: right_virtual_network for the ServiceInstance
+  virtual_network_R_fqdn:
+    type: string
+    description: mgmt_virtual_network for the ServiceInstance
+  image:
+    type: string
+    description: Name of the image
+  flavor:
+    type: string
+    description: Flavor
+  service_instance_name:
+    type: string
+    label: Service Pan_Svm_instance fq name
+    description: Service Pan_Svm_instance for port tuple
+  service_interface_type_M:
+    type: string
+    description: service_interface_type for the ServiceTemplate
+  service_interface_type_L:
+    type: string
+    description: service_interface_type for the ServiceTemplate
+  service_interface_type_R:
+    type: string
+    description: service_interface_type for the ServiceTemplate
+  port_tuple_name:
+    type: string
+    description: name of Port Tuple
+
+resources:
+  porttuple:
+    type: OS::ContrailV2::PortTuple
+    properties:
+      name: { get_param: port_tuple_name }
+      service_instance: { get_param: service_instance_name }
+
+  VirtualMachineInterface_M:
+    type: OS::ContrailV2::VirtualMachineInterface
+    depends_on: [ porttuple ]
+    properties:
+      name: { get_param: virtual_network_M }
+      virtual_machine_interface_properties:
+        {
+          virtual_machine_interface_properties_service_interface_type: { get_param: service_interface_type_M },
+        }
+      port_tuple_refs: [{ get_resource: porttuple }]
+      virtual_network_refs: [{ get_param: virtual_network_M_fqdn }]
+
+  VirtualMachineInterface_L:
+    type: OS::ContrailV2::VirtualMachineInterface
+    depends_on: [ porttuple ]
+    properties:
+      name: { get_param: virtual_network_L }
+      virtual_machine_interface_properties:
+        {
+          virtual_machine_interface_properties_service_interface_type: { get_param: service_interface_type_L },
+        }
+      port_tuple_refs: [{ get_resource: porttuple }]
+      virtual_network_refs: [{ get_param: virtual_network_L_fqdn }]
+
+  VirtualMachineInterface_R:
+    type: OS::ContrailV2::VirtualMachineInterface
+    depends_on: [ porttuple ]
+    properties:
+      name: { get_param: virtual_network_R }
+      virtual_machine_interface_properties:
+        {
+          virtual_machine_interface_properties_service_interface_type: { get_param: service_interface_type_R },
+        }
+      port_tuple_refs: [{ get_resource: porttuple }]
+      virtual_network_refs: [{ get_param: virtual_network_R_fqdn }]
+
+  mgmt_InstanceIp:
+    type: OS::ContrailV2::InstanceIp
+    depends_on: [ VirtualMachineInterface_M ]
+    properties:
+      name: { get_param: virtual_network_M }
+      virtual_machine_interface_refs: [{ get_resource: VirtualMachineInterface_M }]
+      virtual_network_refs: [{ get_param: virtual_network_M_fqdn }]
+
+  left_InstanceIp:
+    type: OS::ContrailV2::InstanceIp
+    depends_on: [ VirtualMachineInterface_L ]
+    properties:
+      name: { get_param: virtual_network_L }
+      virtual_machine_interface_refs: [{ get_resource: VirtualMachineInterface_L }]
+      virtual_network_refs: [{ get_param: virtual_network_L_fqdn }]
+
+  right_InstanceIp:
+    type: OS::ContrailV2::InstanceIp
+    depends_on: [VirtualMachineInterface_R ]
+    properties:
+      name: { get_param: virtual_network_R }
+      virtual_machine_interface_refs: [{ get_resource: VirtualMachineInterface_R }]
+      virtual_network_refs: [{ get_param: virtual_network_R_fqdn }]
+
+  Pan_Svm_instance:
+    type: OS::Nova::Server
+    depends_on: [ mgmt_InstanceIp, left_InstanceIp, right_InstanceIp ]
+    properties:
+      image: { get_param:  image }
+      flavor: { get_param: flavor }
+      networks:
+        - port: { get_resource: VirtualMachineInterface_M }
+        - port: { get_resource: VirtualMachineInterface_L }
+        - port: { get_resource: VirtualMachineInterface_R }
+      user_data_format: RAW
+      config_drive: true
+      personality:
+        /config/init-cfg.txt: {get_file: "/root/bootstrap/config/init-cfg.txt"}
+#        /config/init-cfg.txt: { get_file: "http://10.4.1.21/op_test/config/init-cfg.txt" }
+        /config/bootstrap.xml: {get_file: "/root/bootstrap/config/Service_Scaling_bootstrap.xml"}
+#        /config/bootstrap.xml: { get_file: "http://10.4.1.21/op_test/config/Service_Chaining_bootstrap_L3.xml" }
+#       /license/authcodes: {get_file: "/opt/pan/bootstrap/license/authcodes"}
+#        /license/authcodes: {get_file: "http://10.4.1.21/op_test/license/authcodes"}
+        
+
+

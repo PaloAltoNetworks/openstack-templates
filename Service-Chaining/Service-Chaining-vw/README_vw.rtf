@@ -1,0 +1,85 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;\f2\fnil\fcharset0 Menlo-Bold;
+}
+{\colortbl;\red255\green255\blue255;\red180\green36\blue25;}
+\margl1440\margr1440\vieww16420\viewh15420\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+\
+\ul READ ME\ulnone \
+\
+The Service chaining vw mode folder consists of : \
+1. Heat template (Service_chaining_template_vw.yaml)\
+2. Environment file (Service_Chaining_env_vw.yaml)\
+3. Initial-configuration file (nit-cfg.txt)\
+4. bootstrap (Service_Chaining_bootstrap_vw.xml)\
+\
+\
+## There is an authcode file included in the template; which is optional . If not required please comment out the line in the template under resource pan_svm_instance.\
+\
+The template file (1) uses the parameters provided in the environment file to deploy a topology of 3 devices: \
+1. PAN_SVM\
+2. Left_VM\'a0\
+3. Right_VM\
+\'a0 \
+The interfaces on the PAVM is mapped onto a service VM created using the \'93Port Tuple\'94. \
+\
+\
+\
+\ul DIRECTIONS FOR USE \ulnone \
+\
+\
+\
+1.Copy and  upload the PAN image using the horizon UI or through glance :\
+>$ glance image-create --name <NAME> --disk-format qcow2      --container-format bare      --file <IMAGE_FILE> \
+root@node-8:~# glance image-create --name PAN-8.0 --disk-format qcow2 --container-format bare --file PAN-8.0.qcow2\
+\
+Step2: Confirm the image presence by doing : \'93glance image-list\'94 on the contrail controller. The image uploaded should be listed in this output. Also there should be a default image \'93TestVM\'94 provided by openstack.\
+\
+Step3: Copy files 3 and 4 [ 3.iInitial-configuration file (init-cfg.txt) 4.bootstrap-vw (Service_Chaining_bootstarp_vw_xml)] onto controller node.\
+Make folders in the hierarchy mentioned below and move the files here:\
+\
+root@node-8:~/bootstrap/config# pwd\
+/root/bootstrap/config\
+root@node-8:~/bootstrap/config# ls -ltr\
+total 36\
+-rw-r--r-- 1 root root    55 Mar 13 17:57 init-cfg.txt\
+-rwxr-xr-x 1 root root 13801 Apr  3 21:36 Service_Chaining_bootstarp_vw_xml\
+root@node-8:~/bootstrap/config#\
+\
+\
+#if authcode file is required; it can be put in the same folder as mentioned above.\
+\
+Step4:Copy the first two files [1. Heat template (Service_chaining_template_vw.yaml) 2. Environment file (Service_Chaining_env_vw.yaml)] onto the contrail controller node.\
+\
+Upon completion of all the above steps try the below command on controller:\
+\
+\
+Syntax: heat stack-create -e <env_file_name> -f <template_file_name> <stack_name> \
+Example:\'a0\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\fs22 \cf0 \CocoaLigature0 root@node-10:~#    \
+root@node-10:~# pwd\
+/root\
+root@node-10:~# ls -ltr | grep Service_Chaining_ | grep vw\
+-rw-r--r-- 1 root root      16849 Feb 15 23:56 Service_Chaining_template_
+\f2\b \cf2 vw
+\f1\b0 \cf0 .yaml\
+-rw-r--r-- 1 root root       1366 Feb 16 01:56 Service_Chaining_env_
+\f2\b \cf2 vw
+\f1\b0 \cf0 .yaml\
+\
+root@node-10:~# 
+\f0\fs24 \CocoaLigature1 heat stack-create -e Service_Chaining_env_vw.yaml -f Service_Chaining_template_vw.yaml  Service-Chaining-vw\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\
+\
+\
+\
+\
+\
+\
+}

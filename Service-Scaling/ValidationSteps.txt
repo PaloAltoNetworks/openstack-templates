@@ -1,0 +1,101 @@
+Validation Steps:
+
+In order to validate the scaling functionality, Ubuntu cloud image was used to to bring up the Left VM and Right VM.(https://cloud-images.ubuntu.com/trusty/)
+These VM's do have two network interfaces; management and Left/Right interface.
+ (management interface was needed to ssh onto the vm and as a reason of using management on eth0 a static route is added as shown)
+
+Step 1. Download the image and use it in the env file after uploading it via glance:
+
+
+ # VM config  
+  flavor: 'm1.small'
+  image: 'Ubuntu'  
+  svm_name: 'PAN_SVM'
+  left_vm_name: 'Left_VM'
+  right_vm_name: 'Right_VM'
+  server_key: server_key
+
+
+Step2: Root the ubuntu 
+
+root@node-8:~# 
+root@node-8:~# ssh ubuntu@10.4.60.163 -i server_key.pem 
+The authenticity of host '10.4.60.163 (10.4.60.163)' can't be established.
+ECDSA key fingerprint is 72:ea:fa:23:60:25:0f:a9:40:a7:da:cd:32:84:45:48.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '10.4.60.163' (ECDSA) to the list of known hosts.
+Welcome to Ubuntu 14.04.4 LTS (GNU/Linux 3.13.0-77-generic i686)
+
+ * Documentation:  https://help.ubuntu.com/
+
+  System information as of Wed Apr  5 19:21:53 UTC 2017
+
+  System load: 0.0               Memory usage: 1%   Processes:       50
+  Usage of /:  55.5% of 1.32GB   Swap usage:   0%   Users logged in: 0
+
+  Graph this data and manage this system at:
+    https://landscape.canonical.com/
+
+  Get cloud support with Ubuntu Advantage Cloud Guest:
+    http://www.ubuntu.com/business/services/cloud
+
+0 packages can be updated.
+0 updates are security updates.
+
+
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+ubuntu@left-vm:~$ sudo passwd root
+sudo: unable to resolve host left-vm
+Enter new UNIX password: 
+Retype new UNIX password: 
+passwd: password updated successfully
+ubuntu@left-vm:~$ 
+ubuntu@left-vm:~$ 
+
+
+
+Step3: add dhcp on eth1
+
+root@left-vm:~$  ip link set dev eth1 down
+root@left-vm:~$  dhclient eth1
+  
+  Edit the file : vi /etc/network/interfaces to add the below data:
+  
+  ## To configure a dynamic IP address
+	auto eth1
+	face eth1 inet dhcp
+	
+	For these settings to take effect you need to restart your networking services. : /etc/init.d/networking restart
+	
+	
+	
+Step4: Install iperf3
+
+add-apt-repository "ppa:patrickdk/general-lucid"
+apt-get update	
+apt-get install iperf3
+
+
+Once complete set up one fo the hosts to act as server and listen and the other as client to send out traffic. 
+These are the below line used for CPU based scaling and throughput based scaling respectively:
+
+server: iperf3 -s
+client: iperf3 -c <server-ip> -P 10 -t 300 ---> (cpu_util)
+client: iperf3 -c <server-ip> -u -b 100m -t 300 --> (network bit rate)
+
+
+
+
+
+
+
+  
+
+

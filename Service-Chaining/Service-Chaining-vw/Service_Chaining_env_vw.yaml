@@ -1,0 +1,50 @@
+parameters:
+# VN config
+  management_network: 'mgmt_nw'
+  left_vn: 'left_nw'
+  right_vn: 'right_nw'
+  left_vn_fqdn: 'default-domain:admin:left_nw'
+  right_vn_fqdn: 'default-domain:admin:right_nw'
+  route_target: "target:64512:20000"
+# VM config  
+  flavor: 'm1.small'
+  image: 'TestVM'
+  svm_name: 'PAN_SVM_vw'
+  left_vm_name: 'Left_VM_vw'
+  right_vm_name: 'Right_VM_vw'
+  port_tuple_name: 'port_tuple_vw'
+#ST Config 
+  S_Tmp_name: PAN_SVM_template_vw
+  S_Tmp_version: 2
+  S_Tmp_service_mode: 'transparent'
+  S_Tmp_service_type: 'firewall'
+  S_Tmp_image_name: 'PA-VM-8.0.0'
+  S_Tmp_flavor: 'm1.large'
+  S_Tmp_interface_type_mgmt: 'management'
+  S_Tmp_interface_type_left: 'left'
+  S_Tmp_interface_type_right: 'right'
+  domain: 'default-domain'
+# SI Config    
+  S_Ins_name: PAN_SVM_instance_vw
+  S_Ins_fq_name: 'default-domain:admin:PAN_SVM_instance_vw'
+#IPAM Config
+  NetIPam_ip_prefix_mgmt: '172.15.0.0'
+  NetIPam_ip_prefix_len_mgmt: 24
+  NetIPam_ip_prefix_left: '20.20.1.0'
+  NetIPam_ip_prefix_len_left: 24
+  NetIPam_ip_prefix_right: '20.20.2.0'
+  NetIPam_ip_prefix_len_right: 24
+  NetIPam_addr_from_start_true: true
+#Policy Config  
+  policy_name: 'PAN_SVM_policy-vw'
+  policy_fq_name: 'default-domain:admin:PAN_SVM_policy-vw'
+  simple_action: 'pass'
+  protocol: 'any'
+  src_port_end: -1
+  src_port_start: -1
+  direction: '<>'
+  dst_port_end: -1
+  dst_port_start: -1
+
+
+

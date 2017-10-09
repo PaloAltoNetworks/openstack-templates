@@ -1,0 +1,62 @@
+parameters:
+ # VN config
+  management_network: 'management_vnet'
+  left_network: 'left_vnet'
+  right_network: 'right_vnet'
+  left_vn_fqdn: 'default-domain:admin:left_vnet'
+  right_vn_fqdn: 'default-domain:admin:right_vnet'
+  route_target: "target:64512:20000"  
+ # VM config  
+  flavor: 'm1.small'
+  left_vm_image: 'Ubuntu' 
+  right_vm_image: 'Ubuntu'  
+  svm_name: 'PAN_SVM'
+  left_vm_name: 'Left_VM'
+  right_vm_name: 'Right_VM'
+  server_key: server_key  
+ #ST Config
+  S_Tmp_name: PAN_SVM_template
+  S_Tmp_version: 2
+  S_Tmp_service_mode: 'in-network'
+  S_Tmp_service_type: 'firewall'
+  S_Tmp_image_name: 'PA-VM-8.0.0'
+  S_Tmp_flavor: 'm1.large'
+  S_Tmp_service_scaling: True
+  S_Tmp_interface_type_mgmt: 'management'
+  S_Tmp_interface_type_left: 'left'
+  S_Tmp_interface_type_right: 'right'
+  domain: 'default-domain'
+ #SI Config
+  S_Ins_name: PAN_SVM_Instance
+  S_Ins_fq_name: 'default-domain:admin:PAN_SVM_Instance'  
+#IPAM Config
+  NetIPam_ip_prefix_mgmt: '172.2.0.0'
+  NetIPam_ip_prefix_len_mgmt: 24
+  NetIPam_ip_prefix_left: '20.20.20.0'
+  NetIPam_ip_prefix_len_left: 24
+  NetIPam_ip_prefix_right: '30.30.30.0'
+  NetIPam_ip_prefix_len_right: 24
+  NetIPam_addr_from_start_true: true
+  port_tuple_name: 'port_tuple'
+# Policy Config  
+  policy_name: 'PAN_SVM_policy'
+  policy_fq_name: 'default-domain:admin:PAN_SVM_policy'
+  simple_action: 'pass'
+  protocol: 'any'
+  src_port_end: -1
+  src_port_start: -1
+  direction: '<>'
+  dst_port_end: -1
+  dst_port_start: -1 
+#Alarm
+#  meter_name: 'network.incoming.bytes.rate'
+  meter_name: 'cpu_util'
+  cooldown_initial: 1200
+  cooldown_scaleup: 1200
+  cooldown_scaledown: 1200
+  period_high: 300
+  period_low: 300
+ # threshold_high: 2800
+  threshold_high: 40
+ # threshold_low: 12000
+  threshold_low:  20
