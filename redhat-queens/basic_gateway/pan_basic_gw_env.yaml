@@ -1,0 +1,11 @@
+parameters:
+  public_network: public_network
+  pan_image: pa-vm-8.0.0
+  pan_flavor: m1.large
+  server_image: Ubuntu-14.04
+  server_flavor: m1.small
+  server_key: server_key
+  mgmt_network: mgmt_network
+  mgmt_subnet: mgmt_subnet
+  router: router
+

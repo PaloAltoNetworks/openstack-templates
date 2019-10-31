@@ -1,0 +1,197 @@
+heat_template_version: 2015-04-30
+
+description: Example template to deploy a PAN firewall and Linux server instances
+
+parameters:
+  pan_image:
+    type: string
+    label: PAN image name
+    description: PAN virtual firewall image to be used for firewall instance
+    default: pa-vm-7.1.4 
+
+  server_image:
+    type: string
+    label: Server image name
+    description: Server image to be used for server instance
+    default: Ubuntu-14.04
+
+  pan_flavor:
+    type: string
+    label: Flavor
+    description: Type of instance (flavor) to be used for PAN firewall instance
+    default: m1.medium
+
+  server_flavor:
+    type: string
+    label: Flavor
+    description: Type of instance (flavor) to be used for server instance
+    default: m1.small
+
+  server_key:
+    type: string
+    label: Key name
+    description: Name of key-pair to be used for server instance
+
+  public_network:
+    type: string
+    label: Public network name
+    description: Public network for which floating IP addresses will be allocated
+
+  mgmt_network:
+    type: string
+    label: Management network name
+    description: Network to attach the PAN firewall management port to.
+
+  mgmt_subnet:
+    type: string
+    label: Management network subnet name
+    description: Subnet to attach the PAN firewall management port to.
+
+  router:
+    type: string
+    label: Router name
+    description: Router to provide external network access for PAN firewall untrust network
+
+resources:
+  pan_trust_net:
+        type: OS::Neutron::Net
+        properties:
+          name: pan-trust-net
+
+  pan_trust_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+          network_id: { get_resource: pan_trust_net }
+          cidr: 192.168.100.0/24
+          gateway_ip: 192.168.100.1
+
+  pan_untrust_net:
+        type: OS::Neutron::Net
+        properties:
+          name: pan-untrust-net
+
+  pan_untrust_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+          network_id: { get_resource: pan_untrust_net }
+          cidr: 192.168.200.0/24
+          gateway_ip: 192.168.200.1
+
+  allow_ssh_https_icmp_secgroup:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: tcp
+          remote_ip_prefix: 0.0.0.0/0
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          remote_ip_prefix: 0.0.0.0/0
+          port_range_min: 443
+          port_range_max: 443
+        - protocol: icmp
+          remote_ip_prefix: 0.0.0.0/0
+
+  pan_untrust_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: pan_untrust_net }
+      security_groups:
+        - { get_resource: allow_ssh_https_icmp_secgroup }
+      fixed_ips:
+        - subnet: { get_resource: pan_untrust_subnet }
+          ip_address: "192.168.200.10"
+
+  pan_untrust_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_network }
+
+  pan_untrust_floating_ip_assoc:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: pan_untrust_floating_ip }
+      port_id: { get_resource: pan_untrust_port }
+
+  pan_trust_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: pan_trust_net }
+      security_groups:
+        - { get_resource: allow_ssh_https_icmp_secgroup }
+      fixed_ips:
+        - subnet: { get_resource: pan_trust_subnet }
+
+  server_trust_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: pan_trust_net }
+      security_groups:
+        - { get_resource: allow_ssh_https_icmp_secgroup }
+      fixed_ips:
+        - subnet: { get_resource: pan_trust_subnet }
+          ip_address: "192.168.100.10"
+
+  pan_router_untrust_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_param: router }
+      subnet_id: { get_resource: pan_untrust_subnet }
+
+  mgmt_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: mgmt_network }
+      security_groups:
+        - { get_resource: allow_ssh_https_icmp_secgroup }
+      fixed_ips:
+        - subnet: { get_param: mgmt_subnet }
+
+  mgmt_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_network }
+
+  mgmt_floating_ip_assoc:
+    type: OS::Neutron::FloatingIPAssociation
+    properties: 
+      floatingip_id: { get_resource: mgmt_floating_ip }
+      port_id: { get_resource: mgmt_port }
+
+  pan_fw_instance:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: pan_image }
+      flavor: { get_param: pan_flavor }
+      networks:
+        - port: { get_resource: mgmt_port }
+        - port: { get_resource: pan_untrust_port }
+        - port: { get_resource: pan_trust_port }
+      user_data_format: RAW
+      config_drive: true
+      user_data:
+        get_file: http://webserver/images/bootstrap.tgz
+
+  server_instance:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: server_image }
+      flavor: { get_param: server_flavor }
+      key_name: { get_param: server_key }
+      networks:
+        - port: { get_resource: server_trust_port }
+
+outputs:
+  pan_fw_name:
+    description: Name of the PAN firewall
+    value: { get_attr: [pan_fw_instance, name] }
+  pan_fw_mgmt_ip:
+    description: Management IP address of the PAN firewall in mgmt network 
+    value: { get_attr: [pan_fw_instance, first_address] }
+  pan_fw_public_ip:
+    description: Floating IP address of PAN firewall in public network
+    value: { get_attr: [ pan_untrust_floating_ip, floating_ip_address ] }
+  server_name:
+    description: Name of the server
+    value: { get_attr: [server_instance, name] }
+
